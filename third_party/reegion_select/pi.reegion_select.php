@@ -15,33 +15,33 @@
 
     Read the terms of the GNU General Public License
     at <http://www.gnu.org/licenses/>.
-    
+
     Copyright 2011 Derek Hogue
 */
 
 $plugin_info = array(
 	'pi_name'			=> 'REEgion Select',
-	'pi_version'		=> '2.1',
+	'pi_version'		=> '2.2',
 	'pi_author'			=> 'Derek Hogue',
 	'pi_author_url'		=> 'http://github.com/amphibian/reegion_select.ee2_addon',
-	'pi_description'	=> 'Displays a drop down select menu of countries, US states, Canadian provinces, or UK counties.',
+	'pi_description'	=> 'Displays a drop down select menu of countries, US states, Canadian provinces, UK counties, Australian states & territories, or South African provinces.',
 	'pi_usage'			=> Reegion_select::usage()
 );
 
 class Reegion_select {
-	
+
 	/**
 	 * Constructor
 	*/
-	
+
 	function Reegion_select()
 	{
 		$this->EE =& get_instance();
 		$this->EE->load->helper('form');
-		$this->EE->lang->loadfile('reegion_select');		
+		$this->EE->lang->loadfile('reegion_select');
 	}
-	
-	
+
+
 	/**
 	 * Display the dropdown menu.
 	 *
@@ -50,11 +50,11 @@ class Reegion_select {
 	 * @param string $list Name of the data array to use when building the list.
 	 * @param string $name The default string for the "name" attribute on the <select> menu (in the case that one is not supplied).
 	 */
-	
+
 	function _display($list, $name)
-	{		
+	{
 		include PATH_THIRD.'reegion_select/libraries/regions.php';
-		
+
 		$style = (empty($this->EE->TMPL->tagdata)) ? 'dropdown' : 'linear';
 		$show = $this->EE->TMPL->fetch_param('show', FALSE);
 		$hide = $this->EE->TMPL->fetch_param('hide', FALSE);
@@ -63,7 +63,7 @@ class Reegion_select {
 		$vars = array();
 		$i = 0;
 		$options = array('' => $title);
-				
+
 		if($style == 'dropdown')
 		{
 			$type = $this->EE->TMPL->fetch_param('type', 'name');
@@ -74,7 +74,7 @@ class Reegion_select {
 			$required = $this->EE->TMPL->fetch_param('required', FALSE);
 			$selected = $this->EE->TMPL->fetch_param('selected', '');
 			$null_divider = $this->EE->TMPL->fetch_param('null_divider', 'y');
-			
+
 			$extra = 'class="'.trim($class).'"';
 			if($id)
 			{
@@ -88,23 +88,26 @@ class Reegion_select {
 			{
 				$extra .= ' required="required"';
 			}
-			
+
 			// Check for data- params
-			foreach($this->EE->TMPL->tagparams as $param => $value)
+			if ($this->EE->TMPL->tagparams)
 			{
-				if(substr($param, 0, 5) == 'data-')
+				foreach($this->EE->TMPL->tagparams as $param => $value)
 				{
-					$extra .= ' '.$param.'="'.$value.'"';
+					if(substr($param, 0, 5) == 'data-')
+					{
+						$extra .= ' '.$param.'="'.$value.'"';
+					}
 				}
 			}
-						
+
 			if($null_divider == 'y')
 			{
 				$options[] = '--------------------';
-			}		
-		
+			}
+
 		}
-				
+
 		switch($list)
 		{
 			case 'countries':
@@ -116,6 +119,12 @@ class Reegion_select {
 			case 'provinces':
 				$regions = $provinces;
 				break;
+			case 'au_states':
+				$regions = $au_states;
+				break;
+			case 'za_provinces':
+				$regions = $za_provinces;
+				break;
 		 	case 'provinces_states':
 				$regions[$this->EE->lang->line('rs_provinces')] = $provinces;
 				$regions[$this->EE->lang->line('rs_states')] = $states;
@@ -126,9 +135,16 @@ class Reegion_select {
 				break;
 			case 'ukcounties' :
 				$regions = $ukcounties;
-				break;				
+				break;
+			case 'all' :
+				$regions[$this->EE->lang->line('rs_states')] = $states;
+				$regions[$this->EE->lang->line('rs_provinces')] = $provinces;
+				$regions[$this->EE->lang->line('rs_ukcounties')] = $ukcounties;
+				$regions[$this->EE->lang->line('rs_au_states')] = $au_states;
+				$regions[$this->EE->lang->line('rs_za_provinces')] = $za_provinces;
+				break;
 		}
-			
+
 		foreach($regions as $k => $label)
 		{
 			if(is_array($label))
@@ -139,7 +155,7 @@ class Reegion_select {
 				{
 					$val = ((isset($type) && $type == 'alpha2') || $style == 'linear') ? $sp_k : $sp_label;
 					if(
-						($show == FALSE || in_array($val, explode('|', $show))) && 
+						($show == FALSE || in_array($val, explode('|', $show))) &&
 						($hide == FALSE || !in_array($val, explode('|', $hide)))
 					)
 					{
@@ -148,9 +164,9 @@ class Reegion_select {
 						$vars[$i]['region_alpha2'] = $sp_k;
 						$vars[$i]['region_alpha3'] = '';
 						$i++;
-					}					
+					}
 				}
-			}	
+			}
 			else
 			{
 				if($style == 'dropdown')
@@ -176,9 +192,9 @@ class Reegion_select {
 				{
 					$val = $k;
 				}
-				
+
 				if(
-					($show == FALSE || in_array($val, explode('|', $show))) && 
+					($show == FALSE || in_array($val, explode('|', $show))) &&
 					($hide == FALSE || !in_array($val, explode('|', $hide)))
 				)
 				{
@@ -190,9 +206,9 @@ class Reegion_select {
 				}
 			}
 		}
-				
-		return ($style == 'dropdown') ? 
-			form_dropdown($select_name, $options, $selected, $extra) : 
+
+		return ($style == 'dropdown') ?
+			form_dropdown($select_name, $options, $selected, $extra) :
 			$this->EE->TMPL->parse_variables($this->EE->TMPL->tagdata, $vars);
 	}
 
@@ -202,25 +218,37 @@ class Reegion_select {
 		return $this->_display('countries','country');
 	}
 
-	
+
 	function states()
 	{
-		return $this->_display('states','state');		
+		return $this->_display('states','state');
 	}
 
-	
+
 	function provinces()
 	{
 		return $this->_display('provinces','province');
 	}
-	
-	
+
+
 	function ukcounties()
 	{
-		return $this->_display('ukcounties','county');	
+		return $this->_display('ukcounties','county');
 	}
-	
-	
+
+
+	function au_states()
+	{
+		return $this->_display('au_states','state');
+	}
+
+
+	function za_provinces()
+	{
+		return $this->_display('za_provinces','province');
+	}
+
+
 	function provinces_states()
 	{
 		return $this->_display('provinces_states','province_state');
@@ -230,78 +258,93 @@ class Reegion_select {
 	function states_provinces()
 	{
 		return $this->_display('states_provinces','state_province');
-	}	
-	
-	
+	}
+
+
+	function all()
+	{
+		return $this->_display('all','region');
+	}
+
+
 	function usage()
 	{
-		ob_start(); 
+		ob_start();
 	?>
-	
+
 		REEgion Select will display a list of:
-		
+
 		- countries (based on the ISO 3166-1 list of countries, dependent territories, and special areas of geographical interest)
 		- US states (based on the USPS official list of US states and possessions)
 		- Canadian provinces and territories
 		- UK counties
+		- Australian states and territories
+		- South African provinces
 		- Canadian provinces and US states together
-		
-		
+		- All of the above sub-country regions together
+
+
 		Use the following EE tags to generate each type of list as a dropdown:
-		
+
 		{exp:reegion_select:countries}
-		
+
 		{exp:reegion_select:states}
-		
+
 		{exp:reegion_select:provinces}
-		
+
 		{exp:reegion_select:ukcounties}
-		
+
 		{exp:reegion_select:provinces_states}
-		
-		
+
+		{exp:reegion_select:au_states}
+
+		{exp:reegion_select:za_provinces}
+
+		{exp:reegion_select:all}
+
+
 		Or, use a tag pair to customize the display of regions with your own markup:
-		
+
 		{exp:reegion_select:countries}
 			{region_name}
 			{region_alpha2}
 			{region_alpha3}
 		{/exp:reegion_select:countries}
-		
+
 		(And likewise for the other region types.)
-		
+
 		You can also use the {count} and {total_results} variables within the tag pair.
-		
-		
+
+
 		REEgion Select accepts ten optional parameters:
-				
+
 		show="" - a pipe-delimited list of values to show, if you don't want all of the default values to display. (e.g., show="CA|NY|OH|MI")
-		
+
 		hide="" - a pipe-delimited list of values to hide, if you don't want all of the default values to display. (e.g., hide="Canada|United States|Mexico")
-				
+
 		name="" - value for the "name" attribute of the <select> menu. Defaults: "country", "state", "province", "county", "province_state".
-		
+
 		type="" - "alpha2" will use use the ISO 3166-2 abbreviation as the <option> value for countries, states, and provinces. "alpha3" will use use the ISO 3166-1 abbreviation as the <option> value for countries. "name" will use the region name as the value. Default: "name".
-		
+
 		title="" - a title or heading for the <select> menu. Defaults to "Select a (Country/State/Province/etc)".
 
 		id="" - value for the "id" attribute of the <select> menu.
-		
+
 		class="" - value for the "class" attribute of the <select> menu.
-		
+
 		tabindex="" - value for the "tabindex" attribute of the <select> menu.
 
 		required="" - whether to add the HTML5 "required" attribute to the <select> menu.
 
 		data-[value]="" - any "data-" values passed as individual parameters will be added verbatim to the <select> menu.
-		
+
 		selected="" - value of the <option> element that should be selected by default.
-		
-		null_divider="false" - whether or not to include a divider option with a null value. Defaults to "true". 
-		
+
+		null_divider="false" - whether or not to include a divider option with a null value. Defaults to "true".
+
 	<?php
 		$buffer = ob_get_contents();
-		ob_end_clean(); 
+		ob_end_clean();
 		return $buffer;
 	}
 
