@@ -4,7 +4,10 @@ REEgion Select is an EE2 plugin and fieldtype that displays a list of:
 - US states (based on the USPS official list of US states and possessions)
 - Canadian provinces and territories
 - UK counties
+- Australian states and territories
+- South African provinces
 - Canadian provinces and U.S. states together (or U.S. States and Canadian provinces together)
+- All of the above sub-country regions together
 
 ##Fieldtype Usage
 
@@ -27,6 +30,12 @@ Use the following EE tags to generate each type of dropdown `<select>` menu in y
 `{exp:reegion_select:provinces_states}`
 
 `{exp:reegion_select:states_provinces}`
+
+`{exp:reegion_select:au_states}`
+
+`{exp:reegion_select:za_provinces}`
+
+`{exp:reegion_select:all}`
 
 Or use a tag pair to generate your own custom lists or menus, using the following variables:
 
@@ -64,7 +73,7 @@ REEgion Select can also be used as a var type in the [Low Variables](http://devo
 `{exp:low_variables:parse var="var_name" type="name"}`
 
 `{exp:low_variables:parse var="var_name" type="alpha3"}`
-   
+
 ##Compatibility
 
 This version of REEgion Select is only compatible with ExpressionEngine 2.1.3 or higher. The ExpressionEngine 1.6-compatible version [can be found here](http://github.com/amphibian/pi.reegion_select.ee_addon). REEgion Select can also be used as a [Low Variables](http://devot-ee.com/add-ons/low-variables/) var type, and REEgion Select fields are optimized for [Low Search](http://devot-ee.com/add-ons/low-search/) indexing.
