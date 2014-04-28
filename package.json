@@ -1,0 +1,13 @@
+{
+  "schema_version": "1.0",
+  "name": "reegion_select",
+  "label": "REEgion Select",
+  "version": "2.1",
+  "types": ["fieldtype","plugin"],
+  "paths": {
+    "system": [
+      "system/expressionengine/third_party/reegion_select"
+    ]
+  }
+}
+
