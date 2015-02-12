@@ -3,6 +3,7 @@
 $lang = array(
 	'rs_region_type' => 'Region Type',
 	'rs_countries' => 'Countries',
+	'rs_countries_alpha3' => 'Countries (alpha3)',
 	'rs_states' => 'U.S. States',
 	'rs_provinces' => 'Canadian Provinces',
 	'rs_provinces_states' => 'Canadian Provinces and U.S. States',

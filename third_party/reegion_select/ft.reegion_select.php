@@ -87,6 +87,7 @@ class Reegion_select_ft extends EE_Fieldtype {
 	{		
 		return array(
 			'countries' => $this->EE->lang->line('rs_countries'),
+			'countries_alpha3' => $this->EE->lang->line('rs_countries_alpha3'),
 			'states' => $this->EE->lang->line('rs_states'),
 			'provinces' => $this->EE->lang->line('rs_provinces'),
 			'provinces_states' => $this->EE->lang->line('rs_provinces_states'),
@@ -147,6 +148,13 @@ class Reegion_select_ft extends EE_Fieldtype {
 			case 'countries':
 				$regions = $countries;
 				break;
+			case 'countries_alpha3':
+				$regions = array();
+				foreach ($countries as $alpha2 => $country)
+				{
+					$regions[$countries_alpha3[$alpha2]] = $country;
+				}
+				break;
 			case 'states':
 				$regions = $states;
 				break;
@@ -192,6 +200,10 @@ class Reegion_select_ft extends EE_Fieldtype {
 			case 'countries':
 				return $countries[$data];
 				break;
+			case 'countries_alpha3':
+				$alpha2 = array_search($data, $countries_alpha3);
+				return $countries[$alpha2];
+				break;
 			case 'states':
 				return $states[$data];
 				break;
@@ -209,8 +221,15 @@ class Reegion_select_ft extends EE_Fieldtype {
 	}
 	
 	
-	function replace_alpha2($data, $params = array(), $tagdata = FALSE)
+	function replace_alpha2($data, $params = array(), $tagdata = FALSE, $lv_settings = array())
 	{
+		$settings = (!empty($lv_settings)) ? $lv_settings : $this->settings;
+		if($settings['region_type'] == 'countries_alpha3')
+		{
+			include PATH_THIRD.'reegion_select/libraries/regions.php';
+			$data = array_search($data, $countries_alpha3);
+		}
+		
 		// Alpha-2 is what we store in the database, so spit it out
 		return $data;
 	}
@@ -268,6 +287,11 @@ class Reegion_select_ft extends EE_Fieldtype {
 			case 'countries':
 				$r .= ' ' . $countries_alpha3[$data];
 				$r .= ' ' . $countries[$data];
+				break;
+			case 'countries_alpha3':
+				$alpha2 = array_search($data, $countries_alpha3);
+				$r .= ' ' . $alpha2;
+				$r .= ' ' . $countries[$alpha2];
 				break;
 			case 'states':
 				$r .= ' ' . $states[$data];
